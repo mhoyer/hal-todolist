@@ -63,6 +63,13 @@ function *createTodo() {
     const origin = this.request.origin;
     const halify = halConverter(origin);
     const {title, checked} = this.request.body;
+
+    if (typeof(title) !== 'string') {
+        this.status = 400;
+        this.body = { error: `The "title" property is missing or its value ("${title}") is not a string.` };
+        return;
+    }
+
     const id = todoIdCounter; todoIdCounter++;
     const todo = {title,checked,id};
     todo.checked = checked === true;

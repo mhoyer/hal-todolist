@@ -53,6 +53,13 @@ describe('Todo resource:', () => {
             });
         });
 
+        it('returns 400 in case of broken body', done => {
+            postFakeTodo({}, (err, response) => {
+                expect(response.statusCode).toBe(400);
+                done();
+            });
+        });
+
         it('returns the new todo resource', done => {
             postFakeTodo((err, response) => {
                 const todoRes = JSON.parse(response.body);
