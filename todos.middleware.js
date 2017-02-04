@@ -8,7 +8,11 @@ let todos = [];
 function halConverter(origin) {
     return todo => {
         const {id,title,checked} = todo;
-        const _links = { self: { href: `${origin}/todos/${id}` } };
+        const _links = {
+            self: { href: `${origin}/todos/${id}` },
+            'todo:update': { href: `${origin}/todos/${id}`, method: 'PUT', title: 'Updates a todo item.' },
+            'todo:delete': { href: `${origin}/todos/${id}`, method: 'DELETE', title: 'Deletes a todo item!' },
+        };
 
         return {
             _links,

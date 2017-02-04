@@ -69,8 +69,18 @@ describe('Todo resource:', () => {
                 const todoRes = JSON.parse(response.body);
 
                 expect(todoRes._links).toBeDefined();
-                expect(Object.keys(todoRes._links).length).toBe(1);
-                expect(todoRes._links.self.href).toMatch(/^http\:\/\/localhost:3000\/todos\/\d+/);
+                expect(Object.keys(todoRes._links).length).toBe(3);
+                expect(todoRes._links.self.href).toBe('http://localhost:3000/todos/0');
+                expect(todoRes._links['todo:update']).toEqual({
+                    href: 'http://localhost:3000/todos/0',
+                    title: 'Updates a todo item.',
+                    method: 'PUT'
+                });
+                expect(todoRes._links['todo:delete']).toEqual({
+                    href: 'http://localhost:3000/todos/0',
+                    title: 'Deletes a todo item!',
+                    method: 'DELETE'
+                });
 
                 done();
             });
@@ -122,8 +132,18 @@ describe('Todo resource:', () => {
             request.get('http://localhost:3000/todos/0', (err, response) => {
                 const todoRes = JSON.parse(response.body);
 
-                expect(Object.keys(todoRes._links).length).toBe(1);
+                expect(Object.keys(todoRes._links).length).toBe(3);
                 expect(todoRes._links.self.href).toBe('http://localhost:3000/todos/0');
+                expect(todoRes._links['todo:update']).toEqual({
+                    href: 'http://localhost:3000/todos/0',
+                    title: 'Updates a todo item.',
+                    method: 'PUT'
+                });
+                expect(todoRes._links['todo:delete']).toEqual({
+                    href: 'http://localhost:3000/todos/0',
+                    title: 'Deletes a todo item!',
+                    method: 'DELETE'
+                });
 
                 done();
             });
@@ -211,8 +231,18 @@ describe('Todo resource:', () => {
                 const todoRes = JSON.parse(response.body);
 
                 expect(todoRes._links).toBeDefined();
-                expect(Object.keys(todoRes._links).length).toBe(1);
+                expect(Object.keys(todoRes._links).length).toBe(3);
                 expect(todoRes._links.self.href).toMatch(/^http\:\/\/localhost:3000\/todos\/\d+/);
+                expect(todoRes._links['todo:update']).toEqual({
+                    href: 'http://localhost:3000/todos/0',
+                    title: 'Updates a todo item.',
+                    method: 'PUT'
+                });
+                expect(todoRes._links['todo:delete']).toEqual({
+                    href: 'http://localhost:3000/todos/0',
+                    title: 'Deletes a todo item!',
+                    method: 'DELETE'
+                });
 
                 done();
             });
