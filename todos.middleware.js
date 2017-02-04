@@ -25,8 +25,31 @@ function *getTodoList() {
         'todo:create': { href: `${origin}/todos`, title: 'Creates a new todo.', method: 'POST' },
         'todo:clear': { href: `${origin}/todos`, title: 'Deletes ALL todo items!', method: 'DELETE' },
     });
+
+    const options = this.request.querystring.split('&')
+        .filter(pair => pair)
+        .reduce((acc, pair) => {
+            let [key, value] = pair.split('=');
+            if (value === 'true') value = true;
+            if (value === 'false') value = false;
+
+            return Object.assign(acc, {[key]: value});
+        }, {});
+
+    const todoList = todos.filter(t => {
+        if (options.search && !t.title.match(`${options.search}`)) {
+            return false;
+        }
+
+        if (options.checked !== undefined && t.checked !== options.checked) {
+            return false;
+        }
+
+        return true;
+    })
+
     const _embedded = {
-        'todo:list': todos.map(halify)
+        'todo:list': todoList.map(halify)
     }
 
     this.body = yield { _links, _embedded };
@@ -38,6 +61,7 @@ function *createTodo() {
     const {title, checked} = this.request.body;
     const id = todoIdCounter; todoIdCounter++;
     const todo = {title,checked,id};
+    todo.checked = checked === true;
 
     todos.push(todo);
 

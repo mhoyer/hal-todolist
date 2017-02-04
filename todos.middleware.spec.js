@@ -1,41 +1,47 @@
 const request = require('request');
 const specHelper = require('./spec-helper.js');
 
+function postFakeTodo(body, cb) {
+    if (typeof(body) === 'function') {
+        cb = body;
+        body = { title: 'foo', checked: true };
+    }
+
+    const options = {
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' }
+    }
+
+    return request.post('http://localhost:3000/todos', options, cb);
+};
+
+function putFakeTodo(id, body, cb) {
+    if (typeof(body) === 'function') {
+        cb = body;
+        body = { title: 'bar-updated', checked: false };
+    }
+
+    const options = {
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' }
+    }
+
+    return request.put(`http://localhost:3000/todos/${id}`, options, cb);
+};
+
 beforeAll(done => {
     request.delete('http://localhost:3000/todos', (err, response) => {
         done();
     });
 });
 
-describe('Todo resource:', () => {
-
-    function postFakeTodo(cb, body) {
-        if (body === undefined) body = { title: 'foo', checked: true };
-
-        const options = {
-            body: JSON.stringify(body),
-            headers: { 'Content-Type': 'application/json' }
-        }
-
-        return request.post('http://localhost:3000/todos', options, cb);
-    };
-
-    function putFakeTodo(id, cb, body) {
-        if (body === undefined) body = { title: 'bar-updated', checked: false };
-
-        const options = {
-            body: JSON.stringify(body),
-            headers: { 'Content-Type': 'application/json' }
-        }
-
-        return request.put(`http://localhost:3000/todos/${id}`, options, cb);
-    };
-
-    afterEach(done => {
-        request.delete('http://localhost:3000/todos', (err, response) => {
-            done();
-        });
+afterEach(done => {
+    request.delete('http://localhost:3000/todos', (err, response) => {
+        done();
     });
+});
+
+describe('Todo resource:', () => {
 
     describe('POST /todos', () => {
 
@@ -270,6 +276,62 @@ describe('TodoList resource:', () => {
                 expect(todoListRes._embedded['todo:list'].length).toBe(0);
                 done();
             });
+        });
+    });
+
+    describe('GET /todos?search=', () => {
+        it('returns list of matching todo resources', done => {
+            postFakeTodo(() => {
+                postFakeTodo({ title: 'I\'m sorry Dave, I\'m afraid I can\'t do that' }, () => {
+                    request.get('http://localhost:3000/todos?search=Dave', (err, response) => {
+                        const todoListRes = JSON.parse(response.body);
+                        const todos = todoListRes._embedded['todo:list'];
+
+                        expect(todos).toBeDefined();
+                        expect(todos.length).toBe(1);
+                        expect(todos[0]._links.self.href).toEqual('http://localhost:3000/todos/1');
+                        expect(todos[0].title).toBe('I\'m sorry Dave, I\'m afraid I can\'t do that'),
+                        expect(todos[0].checked).toBe(false);
+                        done();
+                    });
+                })
+            })
+        });
+
+        it('returns list of checked todo resources', done => {
+            postFakeTodo(() => {
+                postFakeTodo({ title: 'I\'m sorry Dave, I\'m afraid I can\'t do that' }, () => {
+                    request.get('http://localhost:3000/todos?checked=true', (err, response) => {
+                        const todoListRes = JSON.parse(response.body);
+                        const todos = todoListRes._embedded['todo:list'];
+
+                        expect(todos).toBeDefined();
+                        expect(todos.length).toBe(1);
+                        expect(todos[0]._links.self.href).toEqual('http://localhost:3000/todos/0');
+                        expect(todos[0].title).toBe('foo'),
+                        expect(todos[0].checked).toBe(true);
+                        done();
+                    });
+                })
+            })
+        });
+
+        it('returns list of unchecked todo resources', done => {
+            postFakeTodo(() => {
+                postFakeTodo({ title: 'I\'m sorry Dave, I\'m afraid I can\'t do that' }, () => {
+                    request.get('http://localhost:3000/todos?checked=false', (err, response) => {
+                        const todoListRes = JSON.parse(response.body);
+                        const todos = todoListRes._embedded['todo:list'];
+
+                        expect(todos).toBeDefined();
+                        expect(todos.length).toBe(1);
+                        expect(todos[0]._links.self.href).toEqual('http://localhost:3000/todos/1');
+                        expect(todos[0].title).toBe('I\'m sorry Dave, I\'m afraid I can\'t do that'),
+                        expect(todos[0].checked).toBe(false);
+                        done();
+                    });
+                })
+            })
         });
     });
 
