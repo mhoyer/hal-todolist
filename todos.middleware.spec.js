@@ -20,7 +20,7 @@ describe('Todo resource:', () => {
         return request.post('http://localhost:3000/todos', options, cb);
     };
 
-    function putFakeTodo(cb, body) {
+    function putFakeTodo(id, cb, body) {
         if (body === undefined) body = { title: 'bar-updated', checked: false };
 
         const options = {
@@ -28,7 +28,7 @@ describe('Todo resource:', () => {
             headers: { 'Content-Type': 'application/json' }
         }
 
-        return request.post('http://localhost:3000/todos', options, cb);
+        return request.put(`http://localhost:3000/todos/${id}`, options, cb);
     };
 
     afterEach(done => {
@@ -167,7 +167,70 @@ describe('Todo resource:', () => {
         });
     });
 
+    describe('PUT /todo/:id', () => {
+        beforeEach(done => {
+            postFakeTodo((err, response) => {
+                done();
+            });
+        });
 
+        it('returns correct status and headers', done => {
+            putFakeTodo(0, (err, response) => {
+                expect(response.statusCode).toBe(200);
+                expect(response.headers['content-type']).toBe('application/hal+json; charset=utf-8');
+                done();
+            });
+        });
+
+        it('returns 404 in case of wrong id', done => {
+            putFakeTodo(42, (err, response) => {
+                expect(response.statusCode).toBe(404);
+                done();
+            });
+        });
+
+        it('returns the new todo resource', done => {
+            putFakeTodo(0, (err, response) => {
+                const todoRes = JSON.parse(response.body);
+
+                expect(todoRes.title).toBe('bar-updated'),
+                expect(todoRes.checked).toBe(false);
+                expect(todoRes.id).toBeUndefined('id should not be shipped to consumer.');
+                done();
+            });
+        });
+
+        it('returns also the _links for the todo resource', done => {
+            putFakeTodo(0, (err, response) => {
+                const todoRes = JSON.parse(response.body);
+
+                expect(todoRes._links).toBeDefined();
+                expect(Object.keys(todoRes._links).length).toBe(1);
+                expect(todoRes._links.self.href).toMatch(/^http\:\/\/localhost:3000\/todos\/\d+/);
+
+                done();
+            });
+        });
+
+        it('returns the new todo resource inside the list', done => {
+            putFakeTodo(0, (err, response) => {
+                const todoRes = JSON.parse(response.body);
+
+                // follow-up GET
+                request.get('http://localhost:3000/todos', (err, response) => {
+                    const todoListRes = JSON.parse(response.body);
+                    const todos = todoListRes._embedded['todo:list'];
+
+                    expect(todos.length).toBe(1);
+                    expect(todos[0]._links.self).toEqual(todoRes._links.self);
+                    expect(todos[0].title).toBe('bar-updated'),
+                    expect(todos[0].checked).toBe(false);
+                    expect(todos[0].id).toBeUndefined('id should not be shipped to consumer.');
+                    done();
+                });
+            });
+        });
+    });
 });
 
 describe('TodoList resource:', () => {

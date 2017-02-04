@@ -54,6 +54,20 @@ function *findTodo(id) {
     this.body = yield halify(todo);
 };
 
+function *updateTodo(id) {
+    id = parseInt(id);
+    const origin = this.request.origin;
+    const halify = halConverter(origin);
+    const todo = todos.find(t => t.id === id);
+    if (!todo) return this.status = 404;
+
+    const {title, checked} = this.request.body;
+    todo.title = title;
+    todo.checked = checked;
+
+    this.body = yield halify(todo);
+};
+
 function *deleteTodo(id) {
     id = parseInt(id);
     const todo = todos.find(t => t.id === id);
@@ -78,6 +92,7 @@ const middleware = compose([
 
     route.get('/todos/:id', findTodo),
     route.delete('/todos/:id', deleteTodo),
+    route.put('/todos/:id', updateTodo),
 ]);
 
 module.exports = middleware;
