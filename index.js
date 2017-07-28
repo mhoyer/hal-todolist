@@ -18,3 +18,4 @@ app.use(require('./index.middleware'));
 app.use(require('./todos.middleware'));
 
 app.listen(3000);
+console.log('Running todo list service on: http://localhost:3000');
