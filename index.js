@@ -1,12 +1,14 @@
 const koa = require('koa');
 const logger = require('koa-logger');
 const route = require('koa-route');
+const cors = require('koa-cors');
 const parse = require('co-body');
 const bodyParser = require('koa-bodyparser');
 
 const app = koa();
 
 app.use(logger());
+app.use(cors());
 app.use(bodyParser({enableTypes: ['json']}));
 app.use(function* (next) {
   yield next;
