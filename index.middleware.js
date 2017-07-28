@@ -13,7 +13,7 @@ function *get(next) {
         'todo:list': { href: `${origin}/todos`, title: 'Lists all todos.' },
     });
 
-    this.body = yield { _links };
+    this.body = yield { _links, version: '0.1.0' };
 };
 
 const middleware = compose([

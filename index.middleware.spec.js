@@ -30,12 +30,13 @@ describe('Index resource:', () => {
             });
         });
 
-        it('returns only _links', done => {
+        it('returns only _links and version', done => {
             getIndex((err, response) => {
                 const indexRes = JSON.parse(response.body);
 
-                expect(Object.keys(indexRes).length).toBe(1);
+                expect(Object.keys(indexRes).length).toBe(2);
                 expect(indexRes._links).toBeDefined();
+                expect(indexRes.version).toBe('0.1.0');
                 done();
             });
         });
