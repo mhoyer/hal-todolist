@@ -4,7 +4,7 @@
   "description": "Small HAL REST application managing an in-memory todo list.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon -e js -i node_modules/ -i *.spec.js -w ./",
+    "start": "nodemon index.js -e js -i node_modules/ -i *.spec.js -w ./",
     "test": "jasmine",
     "test:watch": "nodemon -e js -d 1 -i node_modules/ -w ./ --exec npm test"
   },
